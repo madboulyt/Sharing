@@ -1,0 +1,99 @@
+[ ] Cube 
+	1. You can use and ship the DI pipeline on nws2 and cube internal server (using Obiad)
+		* (bad) you cannot run it on cube server by yourself.
+
+	[x] You know how to push to GCP
+
+	(i) Shipment = uploading images to GCP -> docker compose up
+		GCP Imagers URL: https://console.cloud.google.com/artifacts/docker/cube-project-482309/me-central2/ingestion?project=cube-project-482309
+
+	1 Pusing Images To GCP
+
+		VersionNOTE 10: fanout + solving memory leak issues + making it stable
+		IMG_NAME=cube_fao_models:10; docker tag ${IMG_NAME} me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME};
+		IMG_NAME=cube_fao_models:10; docker push me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+
+		VersionNOTEk 10.1.0: solving the garbage bug and adding logs (without parents)
+		IMG_NAME=cube_fao_pipeline:10.1.0; docker tag ${IMG_NAME} me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+		IMG_NAME=cube_fao_pipeline:10.1.0; docker push me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+
+		VersionNOTEk 10.1.1: ui to take JWT from env variable
+		docker compose -p cube_fao -f docker-compose.yml --env-file serving/env_v10.txt up --build 
+		IMG_NAME=cube_fao_pipeline:10.1.1; docker tag ${IMG_NAME} me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+		IMG_NAME=cube_fao_pipeline:10.1.1; docker push me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+
+
+		VersionNOTEk 10.1.2: [Bug Fix]: some documents are mistakenly marked as inprogress however it is done.
+		docker compose -p cube_fao -f docker-compose.yml --env-file serving/env_v10.txt build 
+		IMG_NAME=cube_fao_pipeline:10.1.2; docker tag ${IMG_NAME} me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+		IMG_NAME=cube_fao_pipeline:10.1.2; docker push me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+
+		VersionNOTEk 10.1.3: [Bug Fix]: Uncought exception when image are very bug which exceeds PIL limit, protecting itself from DOS
+		docker compose -p cube_fao -f docker-compose.yml --env-file serving/env_v10.txt build 
+		IMG_NAME=cube_fao_pipeline:10.1.3; docker tag ${IMG_NAME} me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+		IMG_NAME=cube_fao_pipeline:10.1.3; docker push me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+
+
+		# * VersionNOTEk 10.2.0: 
+			[Bug Fix]: rejecting pdf that contains very big pages + first time to run on all cube without any errors
+
+
+		# * Building The new Docker Images:
+				
+			>>>
+			>>> (i) You MUST update the version in serving/env_v10.txt before building <<<
+			>>>
+
+			$ docker compose -p cube_fao -f docker-compose.yml --env-file serving/env_v10.txt build 
+
+		# * Tag The image (one by one)
+		$ IMG_NAME=cube_fao_pipeline:10.2.0; docker tag ${IMG_NAME} me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+
+		# * Push the image or let Obied
+		$ IMG_NAME=cube_fao_pipeline:10.2.0; docker push me-central2-docker.pkg.dev/cube-project-482309/ingestion/${IMG_NAME}
+
+	2 Pushing The Volumn (models, config file)
+		#! LOUD NOTE !#
+		#! LOUD NOTE !#
+			% We use a custom layout model, must be moved the the volumn and must use its thrshold %
+			model_path on cube server = On sharing Repo: https://github.com/madboulyt/Sharing
+			model thrshold = You have in excel sheet in slack
+		#! LOUD NOTE !#
+		#! LOUD NOTE !#
+
+	# Syncing all changes in . (/home/data/TalkToDocs-Ingest/debug/cube_checkpoints)
+	$ gsutil -m rsync -r ./ gs://mozn_cube_delivery/models/Document-Ingestion/v10
+
+	# Pusing files
+	$ gsutil -m cp *tar gs://mozn_cube_delivery/models/Document-Ingestion/v10
+
+
+[ ] Abeer PR
+
+# Must be reflected as sprints
+[ ] Product Priorities 
+		Q1.1 DI End2End Evaluation and Benchmarking
+			[ ] Quality Check
+			[ ] Eval aginst competitors
+			--* Internal Done
+
+			--* External Start
+			[ ] ...
+
+		Q1.2 Extended File Support (DOC, PPT)
+				>> engineering to convert to PDFs + we need to do a little reaserach (taking them without conversion)
+				>> ! DOC and PPT (without graphs) are good enough if they converted to PDFs.
+				(Next Sprint)
+
+		Q1.3 Number Enhancement
+		Q2.5 Do we sitll need to enchane numbers recoginition!?
+
+		Q2.4 Table-support (with foucs on frameless and finance) -> (search team)
+				+ Evaluation
+		Q3.8 CSV Support -> (search team)
+
+		Q3.6  Chart Support -> (search team)
+		Q3.7  Templates Support (IDs, Invoices) -> (search team)
+
+		Q4.9  Finiancial Statements Support  -> (search team)
+		Q4.10 Agentic Document DI
