@@ -12,7 +12,19 @@ import requests
 # ---------------------------
 # Configuration
 # ---------------------------
+
+"""
+cube_files:
+    Imports
+        pdf_files or folder contains PDF files
+    Exports
+        pdf_files or folder contains PDF files
+
+# data_10 keeps the same fodler hierarchy of cube_files, but JSON
+"""
 BASE_DIR = "/home/mozn/data/cvat_data/cube_files"   # Base folder with PDFs
+
+
 PAGE_LIMIT = 500                                    # Max pages to process
 MAX_WORKERS = 50                                    # Parallel requests
 DIR_OUT_ROOT = "data_10"                            # Where JSON results go
