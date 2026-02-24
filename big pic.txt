@@ -1,0 +1,33 @@
+# 1 Custom Layout Model
+# the checkpoint is already moved to the volumn path, double check on Obiad
+
+(base) mozn@fao:~/data/DI/scripts/ft/models/checkpoints_for_integration$ ll
+total 651812
+drwxrwxr-x 2 mozn mozn      4096 Dec  4 11:45 ./
+drwxrwxr-x 4 mozn mozn      4096 Jan 18 11:41 ../
+-rw-rw-r-- 1 mozn mozn 667440268 Dec  4 11:45 fao_layout_3_best_stg2.pth.enc <<< current custom layout
+
+
+# 2 Manual Ingestion
+/home/mozn/data/DI/scripts/manual_ingesting
+(base) mozn@fao:~/data/DI/scripts/manual_ingesting$ ll
+total 4496
+drwxrwxr-x 4 mozn mozn    4096 Feb 18 12:35 ./
+drwxrwxr-x 7 mozn mozn    4096 Feb 11 10:21 ../
+-rw-rw-r-- 1 mozn mozn    5608 Jan 18 10:25 checking_data.py
+drwxrwxr-x 4 mozn mozn    4096 Feb 19 08:19 data_10/ << Output of all cube docs ingested using the stable pipeline
+drwxrwxr-x 4 mozn mozn    4096 Jan  4 18:32 data_v2/ << Output of all cube docs ingested using old model خربان
+-rw-rw-r-- 1 mozn mozn    7046 Jan 18 10:20 ingest_all_export_import_large_files.py << Ignore
+-rw-rw-r-- 1 mozn mozn    5842 Feb 11 11:55 ingest_all_export_import.py << Ignore
+-rw-rw-r-- 1 mozn mozn    9314 Feb 18 13:24 ingest_all.py << Used for running the ingestion
+-rw-rw-r-- 1 mozn mozn 4532695 Feb 18 13:26 pdf_page_counts.json
+-rw-rw-r-- 1 mozn mozn    8691 Jan  1 11:28 sizes.txt
+-rw-rw-r-- 1 mozn mozn    2252 Feb 16 10:16 testing.ipynb
+
+
+
+
+
+
+
+
