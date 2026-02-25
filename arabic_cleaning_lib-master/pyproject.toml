@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "mozn-arabic-cleaning"
+version = "1.5.1"
+description = "For Arabic text cleaning and preprocessing tools"
+authors = ["mostafaashraf413 <shehata.m@mozn.sa>", "osayd-mozn <osayd@mozn.sa>"]
+license = "Proprietary"
+homepage = "https://github.com/MoznSystems/arabic_cleaning_lib"
+packages = [
+    { include = "arabic_cleaning" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+numpy = "^1.22.0"
+Arabic-Stopwords = "^0.3"
+PyArabic = "^0.6.14"
+w3lib = "^1.22.0"
+ftfy = "^6.1.1"
+tqdm = "^4.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+pytest-watch = "~4.2.0"
+pytest-cov = "~3.0.0"
+jupyterlab = "~3.1.18"
+flake8 = "~7.0.0"
+black = "~23.1.0"
+isort = "~5.9.3"
+mypy = "~0.930"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[[tool.poetry.source]]
+name = "pypi"
+priority = "default"
+
+[[tool.poetry.source]]
+name = "mozn"
+url = "https://mozn-947865815790.d.codeartifact.eu-central-1.amazonaws.com/pypi/general/simple/"
+priority = "supplemental"
+
+[[tool.poetry.source]]
+name = "mozn-upload"
+url = "https://mozn-947865815790.d.codeartifact.eu-central-1.amazonaws.com/pypi/general/"
+priority = "supplemental"

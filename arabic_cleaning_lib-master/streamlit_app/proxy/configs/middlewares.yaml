@@ -1,0 +1,15 @@
+http:
+  middlewares:
+    hsts_header:
+      headers:
+        customResponseHeaders:
+          Strict-Transport-Security: "max-age=604800"
+    basic_auth:
+      basicAuth:
+        users:
+          - '{{ env "BASIC_AUTH" }}'
+
+tls:
+  options:
+    cert-options:
+      minVersion: VersionTLS12

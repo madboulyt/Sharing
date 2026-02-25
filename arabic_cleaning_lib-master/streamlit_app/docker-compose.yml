@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  proxy:
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    command: --configfile=/etc/traefik/static.yaml
+    environment:
+      BASIC_AUTH: test_user:$$2y$$05$$RM4t3a1O4G0vORXWBkBuCurgSOh.QA3UoNNceMhowWy1wIFt0GP0O
+    networks:
+      - proxy_nw
+    volumes:
+      - certs:/etc/traefik/acme
+
+  backend:
+    restart: always
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+      args:
+        - ECR_PYTHON=947865815790.dkr.ecr.eu-central-1.amazonaws.com/mozn_python/python
+        - PYTHON_TAG=v3.9.17-poetry-v1.6.1
+    entrypoint:
+      - "python"
+      - "-m"
+      - "streamlit"
+      - "run"
+      - "/backend/cleaning_text.py"
+      - "--server.port=8978"
+      - "--server.address=0.0.0.0"
+    networks:
+      - proxy_nw
+
+  books:
+    restart: always
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+      args:
+        - ECR_PYTHON=947865815790.dkr.ecr.eu-central-1.amazonaws.com/mozn_python/python
+        - PYTHON_TAG=v3.9.17-poetry-v1.6.1
+    entrypoint:
+      - "python"
+      - "-m"
+      - "streamlit"
+      - "run"
+      - "/backend/filter_books.py"
+      - "--server.port=8998"
+      - "--server.address=0.0.0.0"
+      - "--server.baseUrlPath=/books"
+    ports:
+      - "8998:8998"
+    networks:
+      - proxy_nw
+    volumes:
+      - ./src:/backend
+      - ~/data:/data
+
+networks:
+  proxy_nw:
+volumes:
+  certs:
+  files_date:

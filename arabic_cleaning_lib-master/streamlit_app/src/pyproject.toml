@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "cleaning_streamlit"
+version = "1.31.1"
+description = "cleaning_streamlit"
+authors = ["OSOS team <osayd@mozn.ai>"]
+license = "Proprietary"
+readme = "README.md"
+homepage = "https://github.com/MoznSystems/MLops"
+
+[tool.poetry.dependencies]
+python = "~3.9.17"
+mozn-arabic-cleaning = "1.2.0"
+streamlit="^1.25.0"
+pandas = "^2.1.4"
+
+
+[tool.isort]
+profile="black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+line_length = 88
+
+
+[build-system]
+requires = ["poetry>=0.12", "poetry-core>=1.0.0"]
+build-backend = "poetry.masonry.api"
+
+
+[[tool.poetry.source]]
+name = "pypi"
+priority = "default"
+
+[[tool.poetry.source]]
+name = "mozn"
+url = "https://mozn-947865815790.d.codeartifact.eu-central-1.amazonaws.com/pypi/general/simple/"
+priority = "supplemental"
+
+[[tool.poetry.source]]
+name = "mozn-upload"
+url = "https://mozn-947865815790.d.codeartifact.eu-central-1.amazonaws.com/pypi/general/"
+priority = "supplemental"

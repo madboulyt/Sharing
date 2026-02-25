@@ -1,0 +1,27 @@
+http:
+  routers:
+    backend:
+      rule: "Host(`ar-clean.osos.mozn.sa`) && PathPrefix(`/`)"
+      middlewares:
+        - hsts_header@file
+        - basic_auth@file
+      service: backend
+      entryPoints:
+        - "websecure"
+    books:
+      rule: "Host(`ar-clean.osos.mozn.sa`) && PathPrefix(`/books`)"
+      middlewares:
+        - hsts_header@file
+        - basic_auth@file
+      service: books
+      entryPoints:
+        - "websecure"
+  services:
+    backend:
+      loadBalancer:
+        servers:
+          - url: "http://backend:8978/"
+    books:
+      loadBalancer:
+        servers:
+          - url: "http://books:8998/"
