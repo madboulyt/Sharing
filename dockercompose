@@ -1,0 +1,179 @@
+# YAML Anchors for reusable configurations
+x-tpm-devices: &tpm-devices
+  devices:
+    - /dev/tpmrm0
+    - /dev/tpm0
+  group_add:
+    - "108"
+    - "1000"
+
+services:
+
+  service-layout:
+    build:
+      context: .
+      dockerfile: serving/models_servers/Dockerfile
+    image: ${COMPOSE_PROJECT_NAME}_models:${VERSION_MODELS}
+    environment:
+      - LAYOUT_MODEL_PORT=${LAYOUT_MODEL_PORT}
+      - CUDA_DEVICE_ORDER=PCI_BUS_ID # IMPORTANT: DO not renumber the GPUs
+      - PYTHONWARNINGS=ignore::FutureWarning
+    networks:
+      - models-network
+    volumes:
+      - ${CHECKPOINTS_PATH}:/checkpoints
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://service-layout:${LAYOUT_MODEL_PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: >
+      python -c 'from server_detection import main; main()'   
+        --port ${LAYOUT_MODEL_PORT}
+        --config /checkpoints/pipeline_configs_10.yaml
+        --mode layout
+
+
+  service-line:
+    build:
+      context: .
+      dockerfile: serving/models_servers/Dockerfile
+    image: ${COMPOSE_PROJECT_NAME}_models:${VERSION_MODELS}
+    environment:
+      - LINE_MODEL_PORT=${LINE_MODEL_PORT}
+      - CUDA_DEVICE_ORDER=PCI_BUS_ID # IMPORTANT: DO not renumber the GPUs
+      - PYTHONWARNINGS=ignore::FutureWarning
+    networks:
+      - models-network
+    volumes:
+      - ${CHECKPOINTS_PATH}:/checkpoints
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://service-line:${LINE_MODEL_PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: >
+      python -c 'from server_detection import main; main()'   
+      --port ${LINE_MODEL_PORT}
+      --config /checkpoints/pipeline_configs_10.yaml
+      --mode line
+
+
+  service-textrec:
+    build:
+      context: .
+      dockerfile: serving/models_servers/Dockerfile
+    image: ${COMPOSE_PROJECT_NAME}_models:${VERSION_MODELS}
+    environment:
+      - TEXTREC_PORT=${TEXTREC_PORT}
+      - CUDA_DEVICE_ORDER=PCI_BUS_ID # IMPORTANT: DO not renumber the GPUs
+    networks:
+      - models-network
+    volumes:
+      - ${CHECKPOINTS_PATH}:/checkpoints
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://service-textrec:${TEXTREC_PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: >
+      python -c 'from server_text import main; main()' 
+      --port ${TEXTREC_PORT}
+      --config /checkpoints/pipeline_configs_10.yaml
+
+
+
+
+  service-pipeline:
+    build:
+      context: .
+      dockerfile: serving/pipeline_and_ui/Dockerfile
+    image: ${COMPOSE_PROJECT_NAME}_pipeline:${VERSION_PIPELINE}
+    environment:
+      - LICENSE_FILE=/data/license.json
+      - SIG_FILE=/data/license.sig
+      - VENDOR_PUB=/data/vendor_pub.pem
+      - RATE_LIMIT_HANDLER=${RATE_LIMIT_HANDLER}
+      - OTEL_LOGS_ENDPOINT=${OTEL_LOGS_ENDPOINT}
+    networks:
+      - models-network
+    <<: *tpm-devices
+    ports:
+      - "${PIPELINE_PORT}:${PIPELINE_PORT}"
+    volumes:
+      - ${CHECKPOINTS_PATH}:/checkpoints
+      - /home/data/cube_test_env/directories/license-data:/data
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://service-pipeline:${PIPELINE_PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: >
+      python -c 'from server_orchestrator import main; main()' 
+        --port ${PIPELINE_PORT}
+        --config /checkpoints/for_testing/pipeline_configs_20.yaml
+        --url_layout_service=http://service-layout:${LAYOUT_MODEL_PORT}
+        --url_line_service=http://service-line:${LINE_MODEL_PORT}
+        --url_textrec_service=http://service-textrec:${TEXTREC_PORT}
+    depends_on:
+      service-textrec:
+        condition: service_healthy
+      service-layout:
+        condition: service_healthy
+      service-line:
+        condition: service_healthy
+
+
+  ui:
+    build:
+      context: .
+      dockerfile: serving/pipeline_and_ui/Dockerfile
+    image: ${COMPOSE_PROJECT_NAME}_pipeline:${VERSION_PIPELINE}
+    environment:
+      - PIPELINE_SERVER_URL=http://service-pipeline:${PIPELINE_PORT}
+      - JWT_TOK=${JWT_TOK}
+    networks:
+      - models-network
+    ports:
+      - "${UI_PORT}:${UI_PORT}"
+    command: >
+      streamlit run di_ui_app.py 
+        --server.port ${UI_PORT} 
+        --server.address 0.0.0.0
+
+
+networks:
+  models-network:
+
+volumes:
+  pdf_files_v2:
+    
+
+
+
