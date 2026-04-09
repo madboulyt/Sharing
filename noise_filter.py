@@ -3,7 +3,44 @@ import random
 import re
 from collections import Counter
 
+import re
 
+def replace_line_with_rules(text, max_tokens=4):
+    rules = [(
+        [
+            "انكلكيئ", "لكيئ", "العراك", "التاجك", "الذيك",
+            "كيئ", "يحات", "اكك", "يتان", "ديك", "ذيك",
+            "ريك", "زيك", "هلكي", "قلكت",
+        ],
+        "الديوان الملكي"
+    )]
+
+    # 🔥 Pre-check: skip everything if no tokens exist at all
+    all_tokens = [t for tokens, _ in rules for t in tokens]
+    if not any(token in text for token in all_tokens):
+        return text  # 🚀 early exit
+
+    def token_count(line):
+        return len(re.findall(r"\S+", line))
+
+    cleaned_lines = []
+
+    for line in text.splitlines():
+        replaced = False
+
+        # 🔥 cheap check BEFORE regex
+        if any(token in line for token in all_tokens):
+            if token_count(line) <= max_tokens:
+                for tokens, replacement in rules:
+                    if any(token in line for token in tokens):
+                        cleaned_lines.append(replacement)
+                        replaced = True
+                        break
+
+        if not replaced:
+            cleaned_lines.append(line)
+
+    return "\n".join(cleaned_lines)
 
 
 def read_json_file(file_path):
